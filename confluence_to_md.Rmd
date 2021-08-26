@@ -1,0 +1,67 @@
+---
+title: "Confluence_to_Markdown"
+author: "Dennis Huynh"
+date: "05/05/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+# Optional preliminary check
+
+# Read data
+html_page <- readLines("./RUG/Online-books-about-R_460361647.html")
+
+# Display data
+cat(html_page)
+```
+
+```{r}
+library(rmarkdown) # For pandoc_convert
+library(stringr) # For string manipulation
+
+# Get all html files in RUG directory
+files <- list.files(path = "./RUG", pattern = "\\.html$")
+
+# Convert an entire confluence space into GitHub Flavoured Markdown
+for (i in 1:length(files)){
+  
+  # Get the file path
+  # For some reason, `.` in file path does not work. It needs the full filepath.
+  fp <- paste0(getwd(), "/RUG/", files[i])
+  
+  # Convert to Markdown
+  pandoc_convert(fp, to = "gfm", options = "--atx-headers", 
+                 output = paste0(getwd(), "/", str_sub(files[i], 1, -5), "md"))
+}
+```
+
+```{r}
+# Fix all file paths
+# Alternatively, the attachments and images folder can be moved to the working directory
+
+# Get all md files in RUG Markdown Outputs directory
+files <- list.files(path = "./RUG Markdown Outputs", pattern = "\\.md$")
+
+# For each files
+#for (i in 1:length(files)){
+for (i in 1:1){
+
+  # Get the file path
+  # For some reason, `.` in file path does not work. It needs the full filepath.
+  fp <- paste0(getwd(), "/RUG Markdown Outputs/", files[i])
+  
+  # Read the file
+  md <- readLines(fp)
+  
+  # Replace all attachments with the directory that attachments is in
+  str_replace_all(md, "(attachments", "(RUG/attachments")
+  
+  # Replace all imagess with the directory that images is in
+  str_replace_all(md, "(images", "(RUG/images")
+}
+```
+

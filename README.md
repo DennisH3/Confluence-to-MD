@@ -1,11 +1,85 @@
 [(Français)](#le-nom-du-projet)
 
-## Name of the project
+## Confluence to MD
 
-- What is this project?
-- How does it work?
-- Who will use this project?
-- What is the goal of this project?
+Convert Confluence Spaces saved as HTML files to Markdown files  
+The Output files can be found in the `RUG Markdown Output` directory
+
+# Steps to Converting a Confluence Space to Markdown
+
+## Exporting Confluence Space as HTML
+1. Visit the Confluence space of your choosing (I.e. R/Python Users Group (insert confluence link here))
+2. Click on the bottom left corner `Space Tools`, then click on `Content Tools`  
+![Space Tools button, Content Tools](img/space_tools.PNG)
+3. Click on the `Export tab`, tick `HTML`, then click on `Next >>`  
+![Export to HTML](img/html_export.PNG)
+4. You can now choose to export everything (`Normal Export`), or select which pages to export and if comments should be exported (`Custom Export`). Then, click on the `Export` button  
+![Export to HTML options](img/html_export_options.PNG)
+5. It will take some time to export your space into html (from experience, spaces have taken less than 1 minute to download). Once completed, click on `Download here`  
+![Download exported Confluence Space](img/download_html.PNG)
+
+The space will be in your `Downloads` folder as a zip folder. Extract the contents, and move the unzipped folder to a folder of your choice.
+
+## Using Pandoc in RStudio
+There are only 2 packages you need to convert the HTML files to markdown:
+- rmarkdown: For pandoc_convert function
+- stringr: For string manipulation
+
+In the same folder where the unzipped Confluence Space is, create an R script and copy and paste the following code into it:  
+```r
+library(rmarkdown) # For pandoc_convert
+library(stringr) # For string manipulation
+
+# Get all html files in RUG directory
+files <- list.files(path = "./RUG", pattern = "\\.html$")
+
+# Convert an entire confluence space into GitHub Flavoured Markdown
+for (i in 1:length(files)){
+  
+  # Get the file path
+  # For some reason, `.` in file path does not work. It needs the full filepath.
+  fp <- paste0(getwd(), "/RUG/", files[i])
+  
+  # Convert to Markdown
+  pandoc_convert(fp, to = "gfm", options = "--atx-headers", 
+                 output = paste0(getwd(), "/", str_sub(files[i], 1, -5), "md"))
+}
+```
+**Note**: Replace the RUG folder with the extracted Confluence Space's folder name.
+
+This will convert all the HTML files into GitHub Flavoured Markdown in the current working directory. You can change the output path.
+
+## Fixing File Paths
+
+The file paths for the markdown outputs will be wrong, unless they are in the same folder as their original html files.
+
+There are two solutions.
+1. Move the attachments and images folders into the directory where the markdown files are; OR
+2. Run the following script that replaces all instances of attachments and images to working/directory/attachments and working/directory/images:  
+```r
+# Get all md files in RUG Markdown Outputs directory
+files <- list.files(path = "./RUG Markdown Outputs", pattern = "\\.md$")
+
+# For each files
+#for (i in 1:length(files)){
+for (i in 1:1){
+
+  # Get the file path
+  # For some reason, `.` in file path does not work. It needs the full filepath.
+  fp <- paste0(getwd(), "/RUG Markdown Outputs/", files[i])
+  
+  # Read the file
+  md <- readLines(fp)
+  
+  # Replace all attachments with the directory that attachments is in
+  str_replace_all(md, "(attachments", "(RUG/attachments")
+  
+  # Replace all imagess with the directory that images is in
+  str_replace_all(md, "(images", "(RUG/images")
+}
+```
+
+Congratulations! You have successfully converted your Confluence Space into Github Flavoured Markdown that can be rendered in GitLab!
 
 ### How to Contribute
 
