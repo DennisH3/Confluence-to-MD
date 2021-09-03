@@ -3,7 +3,6 @@
 ## Confluence to MD
 
 Convert Confluence Spaces saved as HTML files to Markdown files  
-The Output files can be found in the `RUG Markdown Output` directory
 
 # Steps to Converting a Confluence Space to Markdown
 
